@@ -2,13 +2,13 @@
 Submission for "PARDUS Dosya Sınıflandırma ve Analiz (DoSA)" Competition
 
 # Contributors
-## Team
+### Team
 
 Houssem Menhour
 
 Kübra Köksal
 
-## Supervisors
+### Supervisors
 
 Doç. Dr. Ahmet Sayar
 
