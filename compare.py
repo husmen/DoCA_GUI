@@ -13,7 +13,7 @@ differences = {"0": "same", "-1": "paragraph removed", "1": "paragraph added", "
 differences_2 = {"0": "same", "-1": "removed", "1": "added"}
 
 class CompareFiles():
-    def __init__(self, files, file_format):
+    def __init__(self, files, file_format = None):
         self.files = files
         self.files_opened = []
         self.file_format = file_format
@@ -22,12 +22,15 @@ class CompareFiles():
         for f in self.files:
             self.files_opened.append(OpenFile(f))
 
-        if file_format == "docx":
+        if file_format == None:
+            pass
+
+        elif file_format == "docx":
             for i, f1 in enumerate(self.files_opened):
                 for f2 in self.files_opened[i+1:]:
                     print("# Comparing {} and {} #".format(f1.location,f2.location))
                     self.compare_docx(f1,f2)
-        if file_format == "pptx":
+        elif file_format == "pptx":
             for i, f1 in enumerate(self.files_opened):
                 for f2 in self.files_opened[i+1:]:
                     print("# Comparing {} and {} #".format(f1.location,f2.location))
@@ -278,6 +281,8 @@ class CompareFiles():
 
     def diff_html(self, diff,file):
         tmp = dmp.diff_prettyHtml(diff)
+        if not os.path.exists("html"):
+            os.makedirs("html")
         f = open("html/" + file, 'w')
 
         message = """<meta http-equiv="content-type" content="text/html;charset= utf-8 " />

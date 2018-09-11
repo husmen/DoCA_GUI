@@ -1,10 +1,13 @@
 import os
 import couchdb
+import configparser
 
 #veritabani baglantisi
-user_default = "husmen"
-pw_default = "husmen"
-server_default = "http://localhost:5984/"
+config = configparser.ConfigParser()
+config.read('settings.ini')
+user_default = config["DB"]["db_username"]
+pw_default = config["DB"]["db_password"]
+server_default = config["DB"]["db_server"]
 
 db_dd_p = "docx_diff_par"
 db_dd_w = "docx_diff_word"

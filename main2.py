@@ -4,6 +4,7 @@
 import resource
 import time
 import sys
+import logging
 import configparser
 from threading import Thread
 from open_files import OpenFile
@@ -18,8 +19,8 @@ from ocr import OCR
 from db_handler import *
 
 from PyQt5.QtWidgets import (
-    QMainWindow, QPushButton, QFileDialog, QApplication,  QTabWidget,
-    QVBoxLayout, QWidget, QGridLayout, QComboBox, QDesktopWidget, QInputDialog)
+    QMainWindow, QPushButton, QFileDialog, QApplication,  QTabWidget, QPlainTextEdit, 
+    QVBoxLayout, QWidget, QGridLayout, QComboBox, QDesktopWidget, QInputDialog, QDialog)
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot, QUrl
 
@@ -71,9 +72,6 @@ class Window(QMainWindow):
     def init_ui(self):
         ''' docstring '''
 
-        #self.com = Communicate()
-        # self.com.close_app.connect(self.close)
-
         self.title = 'KOU DoSA GUI | {}'.format(self.config['DEFAULT']['username'])
  
         self.table_widget = MyTableWidget(self, self.config)
@@ -81,23 +79,63 @@ class Window(QMainWindow):
         self.statusBar()
         self.statusBar().showMessage('Ready')
         #self.setGeometry(300, 300, 1280, 720)
-        self.resize(1280, 720)
+        self.resize(720, 480)
         self.center()
         self.setWindowTitle(self.title)
         self.show()
 
     def connect_buttons(self):
+
+        self.table_widget.control1_wid.pushButtons[0].clicked.connect(self.doc_similarity)
+        self.table_widget.control1_wid.pushButtons[1].clicked.connect(self.doc_compare)
+        self.table_widget.control1_wid.pushButtons[2].clicked.connect(self.doc_classify)
+        self.table_widget.control1_wid.pushButtons[3].clicked.connect(self.list_audio)
+
         self.table_widget.control3_wid.pushButtons[0].clicked.connect(self.classify_vid)
         self.table_widget.control3_wid.pushButtons[1].clicked.connect(self.classify_audio)
         self.table_widget.control3_wid.pushButtons[2].clicked.connect(self.list_vid)
         self.table_widget.control3_wid.pushButtons[3].clicked.connect(self.list_audio)
 
+    def doc_compare(self):
+        tmp = self.table_widget.control1_wid.combo_box.currentText()
+        self.statusBar().showMessage('Comparing 2 files')
+        f1 = self.open_file(type=tmp)
+        f2 = self.open_file(type=tmp)
+        
+        if not f1 or not f2:
+            self.statusBar().showMessage('Action Cancelled')
+        else:
+            CompareFiles([f1,f2],tmp)
+
+    def doc_similarity(self):
+        tmp = self.table_widget.control1_wid.combo_box.currentText()
+        self.statusBar().showMessage('Calculating Similarity of 2 files')
+        f1 = self.open_file(type=tmp)
+        f2 = self.open_file(type=tmp)
+        if not f1 or not f2:
+            self.statusBar().showMessage('Action Cancelled')
+        else:
+            SimilarityRatio([f1,f2],tmp,method="fuzzywuzzy")
+    
+    def doc_classify(self):
+        tmp = self.table_widget.control1_wid.combo_box.currentText()
+        self.statusBar().showMessage('Classifying files')
+        if tmp == "docx":
+            SimilarityRatio(self.files_path.docx,"docx")
+        elif tmp == "pptx":
+            SimilarityRatio(self.files_path.pptx,"pptx")
+        elif tmp == "xlsx":
+            SimilarityRatio(self.files_path.xlsx,"xlsx")
+
     def classify_vid(self):
+        startTime = time.time()
         self.statusBar().showMessage('Video Classification Running')
+        self.table_widget.canvas3_wid.test
         video_classifier(self.files_path.vid, tags = tags_vid)
         self.statusBar().showMessage('Video Classification Done')
 
     def classify_audio(self):
+        startTime = time.time()
         self.statusBar().showMessage('Audio Classification Running')
         audio_classifier(self.files_path.audio, tags = tags_audio)
         self.statusBar().showMessage('Audio Classification Done')
@@ -121,51 +159,20 @@ class Window(QMainWindow):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
-    def connect_server(self):
+    def open_file(self, type):
         ''' docstring '''
+        if type == "docx":
+            tmp = "Text Documents (*.docx *.doc *.odt)"
+        elif type == "pptx":
+            tmp = "Presentations (*.pptx *.ppt *.odp)"
+        elif type == "xlsx":
+            tmp = "Datasheets (*.xlsx *.xls *.ods)"
+        fname = QFileDialog.getOpenFileName(self, 'Open file', self.config['DEFAULT']['dataset_path'], tmp)
+        if fname[0]:
+            self.statusBar().showMessage('File {} opened'.format(fname[0]))
+        return fname[0]
 
-        new_tcp_host, ok = QInputDialog.getText(self, 'Connect to Server', 
-            'Enter server IP address:')
-        
-        if ok:
-            # create a socket object
-            self.sckt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            # connection to hostname on the port.
-            print(new_tcp_host)
-            self.sckt.connect((new_tcp_host, TCP_PORT))
-            self.conn_status = True
 
-            # send message to server
-            msg_to_send = 'Houssem'
-            self.sckt.send(msg_to_send.encode('utf-8'))
-
-            # Receive no more than BUFFER_SIZE bytes
-            msg = self.sckt.recv(BUFFER_SIZE)
-
-            # print received reply
-            print(msg.decode('utf-8'))
-            self.statusBar().showMessage(msg.decode('utf-8'))
-
-    def open_file(self):
-        ''' docstring '''
-        if self.conn_status:
-            fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
-
-            if fname[0]:
-                fsize = os.path.getsize(fname[0])
-                self.sckt.send(str(fsize).encode('utf-8'))
-
-                with open(fname[0], 'rb') as f:
-                    data_buffer = f.read(BUFFER_SIZE)
-                    while data_buffer:
-                        self.sckt.send(data_buffer)
-                        data_buffer = f.read(BUFFER_SIZE)
-
-                print('File opened and sent to server')
-                self.statusBar().showMessage('File opened and sent to server')
-                self.receive_files()
-        else:
-            self.statusBar().showMessage('First connect to server')
         
     def close_app(self):
         ''' docstring '''
@@ -190,45 +197,22 @@ class MyTableWidget(QWidget):
         self.tabs.addTab(self.tab1,"File Type 1 (Text Documents)")
         self.tabs.addTab(self.tab2,"File Type 2 (Images and PDFs)")
         self.tabs.addTab(self.tab3,"File Type 3 (Video and Audio)")
- 
-        # Create first tab
-        # self.tab3.layout = Tab3ControlWidget(self)
-        # self.pushButtons = []
-        # self.pushButtons.append(QPushButton("Classify Video"))
-        # self.pushButtons.append(QPushButton("Classify Audio"))
-        # self.pushButtons.append(QPushButton("List Video with metadata"))
-        # self.pushButtons.append(QPushButton("List Audio with metadata"))
-
-        # for button in self.pushButtons:
-        #     self.tab3.layout.addWidget(button)
 
         self.control1_wid = Tab1ControlWidget(self, config)
         self.control2_wid = Tab2ControlWidget(self, config)
         self.control3_wid = Tab3ControlWidget(self, config)
-        self.canvas1_wid = CanvasWidget(self)
-        self.canvas2_wid = CanvasWidget(self)
-        self.canvas3_wid = CanvasWidget(self)
 
-        grid1 = QGridLayout()
-        grid1.setSpacing(10)
-        grid1.addWidget(self.control1_wid, 1, 0)
-        grid1.addWidget(self.canvas1_wid, 1, 1, 1, 7)
-        #grid1.addWidget(self.map_wid, 1, 1, 1, 7)
-        self.tab1.setLayout(grid1)
+        self.tab1.layout = QVBoxLayout(self)
+        self.tab2.layout = QVBoxLayout(self)
+        self.tab3.layout = QVBoxLayout(self)
 
-        grid2 = QGridLayout()
-        grid2.setSpacing(10)
-        grid2.addWidget(self.control2_wid, 1, 0)
-        grid2.addWidget(self.canvas2_wid, 1, 1, 1, 7)
-        #grid1.addWidget(self.map_wid, 1, 1, 1, 7)
-        self.tab2.setLayout(grid2)
+        self.tab1.layout.addWidget(self.control1_wid)
+        self.tab2.layout.addWidget(self.control2_wid)
+        self.tab3.layout.addWidget(self.control3_wid)
 
-        grid3 = QGridLayout()
-        grid3.setSpacing(10)
-        grid3.addWidget(self.control3_wid, 1, 0)
-        grid3.addWidget(self.canvas3_wid, 1, 1, 1, 7)
-        #grid1.addWidget(self.map_wid, 1, 1, 1, 7)
-        self.tab3.setLayout(grid3)
+        self.tab1.setLayout(self.tab1.layout)
+        self.tab2.setLayout(self.tab2.layout)
+        self.tab3.setLayout(self.tab3.layout)
 
         # Add tabs to widget        
         self.layout.addWidget(self.tabs)
@@ -240,28 +224,6 @@ class MyTableWidget(QWidget):
         for currentQTableWidgetItem in self.tableWidget.selectedItems():
             print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())
 
-
-class MainWidget(QWidget):
-    ''' doc string '''
-
-    def __init__(self, parent):
-        super(MainWidget, self).__init__(parent)
-        self.init_ui()
-
-    def init_ui(self):
-        ''' docstring '''
-
-        self.control_wid = ControlWidget(self)
-        #self.map_wid = QWebEngineView(self)
-        self.canvas_wid = CanvasWidget(self)
-
-        grid1 = QGridLayout()
-        grid1.setSpacing(10)
-        grid1.addWidget(self.control_wid, 1, 0)
-        grid1.addWidget(self.canvas_wid, 1, 1, 1, 7)
-        #grid1.addWidget(self.map_wid, 1, 1, 1, 7)
-        self.setLayout(grid1)
-
 class Tab1ControlWidget(QWidget):
     ''' doc string '''
 
@@ -272,10 +234,19 @@ class Tab1ControlWidget(QWidget):
     def init_ui(self):
         ''' docstring '''
 
+        self.combo_box = QComboBox(self)
+        self.combo_box.setToolTip(
+            "Choose Document Type")
+        self.combo_box.addItem("docx")
+        self.combo_box.addItem("pptx")
+        self.combo_box.addItem("xlsx")
+
+
         self.pushButtons = []
         self.pushButtons.append(QPushButton("Calculate Similarity Ratio"))
         self.pushButtons.append(QPushButton("Display Differences"))
 
+        self.pushButtons.append(QPushButton("Classify Documents"))
         self.pushButtons.append(QPushButton("Hierarchecally Classify Documents"))
         self.pushButtons.append(QPushButton("Watch for Changes"))
 
@@ -288,6 +259,7 @@ class Tab1ControlWidget(QWidget):
         for button in self.pushButtons[:2]:
             self.vbox.addWidget(button)
         self.vbox.addStretch(1)
+        self.vbox.addWidget(self.combo_box)
         for button in self.pushButtons[2:4]:
             self.vbox.addWidget(button)
         self.vbox.addStretch(1)
@@ -364,59 +336,6 @@ class Tab3ControlWidget(QWidget):
         self.vbox.addStretch(3)
 
         self.setLayout(self.vbox)
-        
-
-class ControlWidget(QWidget):
-    ''' doc string '''
-
-    def __init__(self, parent):
-        super(ControlWidget, self).__init__(parent)
-        self.init_ui()
-
-    def init_ui(self):
-        ''' docstring '''
-
-        self.connect_btn = QPushButton("Connect to Server")
-        self.open_btn = QPushButton("Open File")
-        self.plot_btn = QPushButton("Plot Trajectory")
-        self.query_btn = QPushButton("Query")
-        self.close_btn = QPushButton("Close")
-
-        self.combo_box = QComboBox(self)
-        self.combo_box.setToolTip(
-            "Choose between full dataset/reduced dataset")
-        self.combo_box.addItem("Full Dataset")
-        self.combo_box.addItem("Reduced Dataset")
-
-        self.vbox = QVBoxLayout(self)
-        self.vbox.setSpacing(10)
-        self.vbox.addStretch(1)
-        self.vbox.addWidget(self.connect_btn)
-        self.vbox.addWidget(self.open_btn)
-        self.vbox.addWidget(self.combo_box)
-        self.vbox.addWidget(self.plot_btn)
-        self.vbox.addWidget(self.query_btn)
-        self.vbox.addWidget(self.close_btn)
-        self.vbox.addStretch(1)
-
-        self.setLayout(self.vbox)
-
-
-class CanvasWidget(QWidget):
-    ''' doc string '''
-
-    def __init__(self, parent):
-        super(CanvasWidget, self).__init__(parent)
-
-        self.figure = Figure()
-        self.canvas = FigureCanvas(self.figure)
-
-        self.vbox = QVBoxLayout(self)
-        self.vbox.addWidget(self.canvas)
-
-        self.setLayout(self.vbox)
-
-
 
 if __name__=="__main__":
 
@@ -437,48 +356,6 @@ if __name__=="__main__":
     #     # clear database
     #     db_server = db_handler()
     #     db_server.delete_all()
-
-    # elif op == "audio_classifier":  
-    #     startTime = time.time()
-    #     # classify audio
-    #     audio_classifier(files_path.audio, tags = tags_audio)
-
-    # elif op == "video_classifier":  
-    #     startTime = time.time()
-    #     # classify video
-    #     video_classifier(files_path.vid, tags = tags_vid)
-        
-    # elif op == "video_display":
-    #     # display video classifications
-    #     display("vid_classification")
-
-    # elif op == "audio_display":
-    #     # display video classifications
-    #     display("audio_classification")
-
-    # elif op == "docx_compare": 
-    #     startTime = time.time()
-    #     CompareFiles(files_path.docx,"docx")
-
-    # elif op == "xlsx_compare": 
-    #     startTime = time.time()
-    #     CompareFiles(files_path.xlsx,"xlsx")
-
-    # elif op == "pptx_compare": 
-    #     startTime = time.time()
-    #     CompareFiles(files_path.pptx,"pptx")
-
-    # elif op == "docx_similarity": 
-    #     startTime = time.time()
-    #     SimilarityRatio(files_path.docx,"docx",method="None")
-
-    # elif op == "xlsx_similarity": 
-    #     startTime = time.time()
-    #     SimilarityRatio(files_path.xlsx,"xlsx",method="fuzzywuzzy")
-
-    # elif op == "pptx_similarity": 
-    #     startTime = time.time()
-    #     SimilarityRatio(files_path.pptx,"pptx",method="fuzzywuzzy")
 
     # elif op == "txt_class_txt": 
     #     startTime = time.time()

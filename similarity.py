@@ -65,10 +65,14 @@ class SimilarityRatio():
                 db = db_ds
                 data.append(doc.text)
         elif file_format == "xlsx":  
-            for doc in self.files_opened:
+            for i, doc in enumerate(self.files_opened):
                 #data.append(open(doc, encoding='latin-1').read())
                 db = db_xs
-                data.append(json.dumps(doc.tables))
+                try:
+                    data.append(json.dumps(doc.tables, skipkeys=True))
+                except:
+                    print("error parsing document {}".format(self.docLabels[i]))
+                    data.append("")
 
         data = nlp_clean(data)
         if method == "fuzzywuzzy":
@@ -112,12 +116,12 @@ class SimilarityRatio():
             #print (docvec)
 
             #to get most similar document with similarity scores using document-index
-            similar_doc = d2v_model.docvecs.most_similar(0) 
-            print(similar_doc)
+            #similar_doc = d2v_model.docvecs.most_similar(0) 
+            #print(similar_doc)
             
-            for doc in similar_doc:
-                db_data = {'dok_id' : {'dok_1' : self.docLabels[0],'dok_2' : doc[0]}, 'kullanici': user_default, 'benzerlik orani': str(doc[1])}
-                self.db_server.save(db, db_data)
+            #for doc in similar_doc:
+            #    db_data = {'dok_id' : {'dok_1' : self.docLabels[0],'dok_2' : doc[0]}, 'kullanici': user_default, 'benzerlik orani': str(doc[1])}
+            #    self.db_server.save(db, db_data)
             #similar_doc = d2v_model.docvecs.most_similar(1) 
             #print(similar_doc)  
 
@@ -130,30 +134,19 @@ class SimilarityRatio():
 
             # #############################################################################
             # Compute Affinity 
-            # = d2v_model.docvecs
-            # print(d2v_model.docvecs)
-            # print(d2v_model[d2v_model.wv.vocab])
-            # X = d2v_model[d2v_model.wv.vocab]
-            # print("### docvecs")
-            # print(d2v_model.docvecs[0])
-            # print("### vectors")
-            # print(d2v_model.wv.vectors)
-            # X = d2v_model.wv.vectors
-
-            
-
+  
             af = AffinityPropagation(preference=-50).fit(X)
             cluster_centers_indices = af.cluster_centers_indices_
             labels = af.labels_
-            labels2 = []
-            for i, lb in enumerate(labels):
-                labels2.append(self.files[i].split('/')[-1])
-            print("labels: {}".format(labels))
-            print("labels2: {}".format(labels2))
+            #labels2 = []
+            #for i, lb in enumerate(labels):
+            #    labels2.append(self.files[i].split('/')[-1])
+            #print("labels: {}".format(labels))
+            #print("labels2: {}".format(labels2))
             n_clusters_ = len(cluster_centers_indices)
             print("number of clusters: {}".format(n_clusters_))
             dic = {i: np.where(labels == i)[0] for i in range(n_clusters_)}
-            print(dic)
+            #print(dic)
 
             for key, value in dic.items():
                 print(key)
@@ -182,6 +175,12 @@ class SimilarityRatio():
             # plt.clf()
 
             colors = cycle('bgrcmykbgrcmykbgrcmykbgrcmyk')
+
+            # reduce dimensions
+            # pca = PCA(n_components=2)
+            # reduced = pca.fit_transform(X)
+            # X = reduced
+
             for k, col in zip(range(n_clusters_), colors):
                 class_members = labels == k
                 cluster_center = X[cluster_centers_indices[k]]
@@ -195,52 +194,29 @@ class SimilarityRatio():
             plt.show()
 
 
-            # ############################################################################
-            # second plot
+            # ####################
+            # 3rd plot
+
             # plt.close('all')
             # fig = plt.figure()
-            # plt.clf()
             # ax = fig.add_subplot(111, projection='3d')
+
+            # pca = PCA(n_components=3)
+            # reduced = pca.fit_transform(X)
+            # X = reduced
+
 
             # for k, col in zip(range(n_clusters_), colors):
             #     class_members = labels == k
             #     cluster_center = X[cluster_centers_indices[k]]
-            #     ax.plot(X[class_members, 0], X[class_members, 1], X[class_members, 1], col + '.')
-            #     ax.plot(cluster_center[0], cluster_center[1], cluster_center[2], 'o', markerfacecolor=col, markeredgecolor='k', markersize=14)
+            #     plt.plot(X[class_members, 0], X[class_members, 1], X[class_members, 2], col + '.')
+            #     #plt.plot(cluster_center[0], cluster_center[1], cluster_center[2], 'o', markerfacecolor=col)
+            #     ax.scatter(cluster_center[0], cluster_center[1], cluster_center[2], 'o', c=col, marker='o', s=50)
             #     for x in X[class_members]:
-            #         ax.plot([cluster_center[0], x[0]], [cluster_center[1], x[1]], [cluster_center[2], x[2]], c=col, marker='.')
+            #         plt.plot([cluster_center[0], x[0]], [cluster_center[1], x[1]], [cluster_center[2], x[2]], col)
 
             # plt.title('Estimated number of clusters: %d' % n_clusters_)
             # plt.show()
-
-            # ####################
-            # 3rd plot
-
-            plt.close('all')
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
-
-            pca = PCA(n_components=3)
-            reduced = pca.fit_transform(X)
-
-            # We need a 3 x 944 array, not 944 by 3 (all X coordinates in one list)
-            #t = reduced.transpose()
-            X = reduced
-
-
-            for k, col in zip(range(n_clusters_), colors):
-                class_members = labels == k
-                cluster_center = X[cluster_centers_indices[k]]
-                plt.plot(X[class_members, 0], X[class_members, 1], X[class_members, 2], col + '.')
-                #plt.plot(cluster_center[0], cluster_center[1], cluster_center[2], 'o', markerfacecolor=col)
-                ax.scatter(cluster_center[0], cluster_center[1], cluster_center[2], 'o', c=col, marker='o', s=50)
-                for x in X[class_members]:
-                    plt.plot([cluster_center[0], x[0]], [cluster_center[1], x[1]], [cluster_center[2], x[2]], col)
-
-            plt.title('Estimated number of clusters: %d' % n_clusters_)
-            plt.show()
-
-
             
             # #########################
             # hierarchical
@@ -252,7 +228,7 @@ class SimilarityRatio():
             #linkage_matrix.append(linkage(X, method='ward', metric='euclidean'))
 
             #linkage_matrix.append(linkage(X, method='single', metric='seuclidean'))
-            linkage_matrix.append(linkage(X, method='average', metric='seuclidean'))
+            # linkage_matrix.append(linkage(X, method='average', metric='seuclidean'))
             #linkage_matrix.append(linkage(X, method='complete', metric='seuclidean'))
 
             for n, l in enumerate(linkage_matrix): 
@@ -269,7 +245,5 @@ class SimilarityRatio():
                     orientation='left',
                     leaf_label_func=lambda v: str(self.files[v].split('/')[-1])
                 )
-                plt.savefig('clusters_{}.png'.format(n), dpi=200) #save figure as ward_clusters
+                #plt.savefig('clusters_{}.png'.format(n), dpi=200) #save figure as ward_clusters
                 plt.show()
-
-            #linkage_matrix2 = ward(dist) #define the linkage_matrix using ward clustering pre-computed distances

@@ -26,6 +26,7 @@ class OpenFile():
             self.tables2 = None
         if (location.endswith("xlsx") or location.endswith("xls") or location.endswith("ods")):
             self.tables, self.tables2 = self.text_al(location)
+            self.text = self.tables
 
         return
 
