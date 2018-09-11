@@ -56,6 +56,7 @@ class audio_classifier():
                 if self.results[i] == self.tags[vid]:
                     correct_counter += 1
                 print("# {} # Result: {} # Actual: {} # Time: {}".format(vid, self.results[i], self.tags[vid], self.times[i]))
-                print("correct answer rate: {}/{}".format(correct_counter, len(self.media)))
             else:
                 print("# {} # Result: {} # Time: {}".format(vid, self.results[i], self.times[i]))
+                
+        print("correct answer rate: {}/{}".format(correct_counter, len(self.media)))

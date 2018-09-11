@@ -11,7 +11,7 @@ from path_handler import path_handler
 from video_classifier import video_classifier
 from audio_classifier import audio_classifier
 from img_class_img import img_class_img
-from txt_class_txt import txt_xlass_txt
+from txt_class_txt import txt_class_txt
 from ocr import OCR
 from db_handler import *
 
@@ -113,9 +113,9 @@ if __name__=="__main__":
     elif op == "txt_class_txt": 
         startTime = time.time()
         for term in search_terms:
-            txt_xlass_txt(files_path.docx, search = term)
-            txt_xlass_txt(files_path.pptx, search = term)
-            txt_xlass_txt(files_path.xlsx, search = term)
+            c(files_path.docx, search = term)
+            c(files_path.pptx, search = term)
+            c(files_path.xlsx, search = term)
         #print("this functionality is not implemented yet")
 
 

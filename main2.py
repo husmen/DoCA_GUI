@@ -14,9 +14,11 @@ from path_handler import path_handler
 from video_classifier import video_classifier
 from audio_classifier import audio_classifier
 from img_class_img import img_class_img
-from txt_class_txt import txt_xlass_txt
+from txt_class_txt import txt_class_txt
 from ocr import OCR
 from db_handler import *
+
+import folder_watchdog
 
 from PyQt5.QtWidgets import (
     QMainWindow, QPushButton, QFileDialog, QApplication,  QTabWidget, QPlainTextEdit, 
@@ -89,7 +91,8 @@ class Window(QMainWindow):
         self.table_widget.control1_wid.pushButtons[0].clicked.connect(self.doc_similarity)
         self.table_widget.control1_wid.pushButtons[1].clicked.connect(self.doc_compare)
         self.table_widget.control1_wid.pushButtons[2].clicked.connect(self.doc_classify)
-        self.table_widget.control1_wid.pushButtons[3].clicked.connect(self.list_audio)
+        self.table_widget.control1_wid.pushButtons[3].clicked.connect(self.watchdog)
+        self.table_widget.control1_wid.pushButtons[4].clicked.connect(self.doc_classify2)
 
         self.table_widget.control3_wid.pushButtons[0].clicked.connect(self.classify_vid)
         self.table_widget.control3_wid.pushButtons[1].clicked.connect(self.classify_audio)
@@ -127,10 +130,27 @@ class Window(QMainWindow):
         elif tmp == "xlsx":
             SimilarityRatio(self.files_path.xlsx,"xlsx")
 
+    def doc_classify2(self):
+        tmp = self.table_widget.control1_wid.combo_box.currentText()
+        self.statusBar().showMessage('Classifying new file')
+        f1 = self.open_file(type=tmp)
+        if not f1:
+            self.statusBar().showMessage('Action Cancelled')
+        else:
+            if tmp == "docx":
+                SimilarityRatio([f1],"docx", method="inference")
+            elif tmp == "pptx":
+                SimilarityRatio([f1],"pptx", method="inference")
+            elif tmp == "xlsx":
+                SimilarityRatio([f1],"xlsx", method="inference")
+
+    def watchdog(self): 
+        folder_watchdog.run(self.config['DEFAULT']['dataset_path'])
+
+
     def classify_vid(self):
         startTime = time.time()
         self.statusBar().showMessage('Video Classification Running')
-        self.table_widget.canvas3_wid.test
         video_classifier(self.files_path.vid, tags = tags_vid)
         self.statusBar().showMessage('Video Classification Done')
 
@@ -246,20 +266,20 @@ class Tab1ControlWidget(QWidget):
         self.pushButtons.append(QPushButton("Calculate Similarity Ratio"))
         self.pushButtons.append(QPushButton("Display Differences"))
 
-        self.pushButtons.append(QPushButton("Classify Documents"))
-        self.pushButtons.append(QPushButton("Hierarchecally Classify Documents"))
+        self.pushButtons.append(QPushButton("Classify Documents in dataset"))
         self.pushButtons.append(QPushButton("Watch for Changes"))
 
-        self.pushButtons.append(QPushButton("Watch and Classify"))
+        self.pushButtons.append(QPushButton("Classify new Document"))
         #.pushButtons[0].clicked.connect(self.classify_vid)
 
         self.vbox = QVBoxLayout(self)
         self.vbox.setSpacing(10)
         self.vbox.addStretch(3)
+        self.vbox.addWidget(self.combo_box)
+        self.vbox.addStretch(1)
         for button in self.pushButtons[:2]:
             self.vbox.addWidget(button)
         self.vbox.addStretch(1)
-        self.vbox.addWidget(self.combo_box)
         for button in self.pushButtons[2:4]:
             self.vbox.addWidget(button)
         self.vbox.addStretch(1)
@@ -339,12 +359,8 @@ class Tab3ControlWidget(QWidget):
 
 if __name__=="__main__":
 
-    APP = QApplication(sys.argv)
-    ex = Window()
-    sys.exit(APP.exec_())
-
     # #specify files locations
-    # op = sys.argv[1] if len(sys.argv) > 1 else None
+    op = sys.argv[1] if len(sys.argv) > 1 else None
     # files_path = path_handler(dataset_path)
     # templates = path_handler(templates_path)
     # #tmp = path_handler(dataset_path, proc="list_files")
@@ -352,10 +368,23 @@ if __name__=="__main__":
     # if not op:
     #     print("# Choose an option #")
 
-    # elif op == "clear_db":
-    #     # clear database
-    #     db_server = db_handler()
-    #     db_server.delete_all()
+    if op == "clear_db":
+        # clear database
+        db_server = db_handler()
+        db_server.delete_all()
+
+    if not os.path.exists("html"):
+            os.makedirs("html")
+
+    if not os.path.exists("tmp"):
+            os.makedirs("tmp")
+
+    if not os.path.exists("models"):
+            os.makedirs("models")
+
+    APP = QApplication(sys.argv)
+    ex = Window()
+    sys.exit(APP.exec_())
 
     # elif op == "txt_class_txt": 
     #     startTime = time.time()

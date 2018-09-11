@@ -21,6 +21,7 @@ db_xs = "xlsx_similarity"
 db_ps = "pptx_similarity"
 
 db_dc = "doc_class"
+
 db_ac = "audio_class"
 db_vc = "vid_class"
 
@@ -31,7 +32,9 @@ db_sh = "search_history"
 db_sh_img = "search_history_img"
 db_ocr = "ocr_history"
 db_f = "files"
-db_names = [db_ac, db_dd_p, db_dd_w, db_dd_t, db_xd, db_pd, db_ps, db_ds, db_xs, db_dc, db_ic_t, db_ic_i, db_vc, db_sh]
+
+db_gensim = "gensim_models"
+db_names = [db_ac, db_dd_p, db_dd_w, db_dd_t, db_xd, db_pd, db_ps, db_ds, db_xs, db_dc, db_ic_t, db_ic_i, db_vc, db_sh, db_gensim]
 
 class db_handler():
     """"""
@@ -59,7 +62,11 @@ class db_handler():
                 for k in data.keys():
                     doc[k] = data[k]
                 db[doc_id] = doc
-        if attachment:
+        if attachment and (attachment.endswith("model") or attachment.endswith("clusters.png")):
+            with open(attachment, "rb") as f:
+                att = f.read()
+            db.put_attachment(db[doc_id], att, filename = attachment)
+        elif attachment:
             with open(attachment, "rb") as f:
                 att = f.read()
             ver = 0

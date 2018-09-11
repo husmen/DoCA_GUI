@@ -199,13 +199,8 @@ class customEventHandler(FileSystemEventHandler):
         else: 
             print(GetHash(event.src_path))
             save_file(os.path.basename(event.src_path),os.path.abspath(event.src_path))
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S')
-    path = sys.argv[1] if len(sys.argv) > 1 else '../dosyalar_ornek'
+def run(path):
+    
     list_files(path)
     event_handler = customEventHandler()
     observer = Observer()
@@ -217,3 +212,11 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         observer.stop()
     observer.join()
+    
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s - %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
+    path = sys.argv[1] if len(sys.argv) > 1 else '../dosyalar_ornek'
+    run(path)
+    

@@ -2,7 +2,7 @@
 from open_files import OpenFile
 from db_handler import *
 
-class txt_xlass_txt():
+class txt_class_txt():
     def __init__(self, files, search = None):
         self.files = files
         self.files_opened = []

@@ -293,7 +293,7 @@ class CompareFiles():
         message = """</body></html>"""
         f.write(message)
         f.close()
-        #webbrowser.open_new_tab("html/" + file)
+        webbrowser.open_new_tab("html/" + file)
 
     def get_status(self, par):
             adds = 0
