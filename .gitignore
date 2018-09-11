@@ -1,6 +1,7 @@
 # user-specific
 tmp/
 html/
+models/
 *.model
 
 # Byte-compiled / optimized / DLL files
