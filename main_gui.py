@@ -6,6 +6,7 @@ import time
 import sys
 import logging
 import configparser
+import webbrowser
 from threading import Thread
 from open_files import OpenFile
 from compare import CompareFiles
@@ -17,12 +18,13 @@ from img_class_img import img_class_img
 from txt_class_txt import txt_class_txt
 from ocr import OCR
 from db_handler import *
+from auto_classifier import AUTO_CLASSIFIER
 
 import folder_watchdog
 
 from PyQt5.QtWidgets import (
-    QMainWindow, QPushButton, QFileDialog, QApplication,  QTabWidget, QPlainTextEdit, 
-    QVBoxLayout, QWidget, QGridLayout, QComboBox, QDesktopWidget, QInputDialog, QDialog)
+    QMainWindow, QPushButton, QFileDialog, QApplication,  QTabWidget, QPlainTextEdit, QLabel, QLineEdit,
+    QVBoxLayout, QHBoxLayout, QWidget, QGridLayout, QComboBox, QDesktopWidget, QInputDialog, QDialog)
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot, QUrl
 
@@ -94,10 +96,17 @@ class Window(QMainWindow):
         self.table_widget.control1_wid.pushButtons[3].clicked.connect(self.watchdog)
         self.table_widget.control1_wid.pushButtons[4].clicked.connect(self.doc_classify2)
 
+        self.table_widget.control2_wid.pushButtons[0].clicked.connect(self.img_class_txt)
+        self.table_widget.control2_wid.pushButtons[1].clicked.connect(self.img_class_img)
+        self.table_widget.control2_wid.pushButtons[2].clicked.connect(self.new_img)
+
         self.table_widget.control3_wid.pushButtons[0].clicked.connect(self.classify_vid)
         self.table_widget.control3_wid.pushButtons[1].clicked.connect(self.classify_audio)
         self.table_widget.control3_wid.pushButtons[2].clicked.connect(self.list_vid)
         self.table_widget.control3_wid.pushButtons[3].clicked.connect(self.list_audio)
+
+        self.table_widget.control4_wid.pushButtons[0].clicked.connect(self.open_db)
+        self.table_widget.control4_wid.pushButtons[1].clicked.connect(self.clear_db)
 
     def doc_compare(self):
         tmp = self.table_widget.control1_wid.combo_box.currentText()
@@ -147,15 +156,41 @@ class Window(QMainWindow):
     def watchdog(self): 
         folder_watchdog.run(self.config['DEFAULT']['dataset_path'])
 
+    def img_class_img(self):
+        self.statusBar().showMessage('Running Template Query on Images')
+        tmplt = self.open_file(type="img")
+        if not tmplt:
+            self.statusBar().showMessage('Action Cancelled')
+        else:
+            img_class_img(self.files_path.img, templates = [tmplt])
+            img_class_img(self.files_path.pdf, templates = [tmplt], file_type = "pdf")
+            self.statusBar().showMessage('Query Done')
+
+    def img_class_txt(self):
+        term = self.table_widget.control2_wid.textbox.text()
+        if term == "":
+            self.statusBar().showMessage('You need one query term')
+        else:
+            self.statusBar().showMessage('Running Text Query on Images')
+            img2txt = OCR(self.files_path.img, lang="tur", search=term)
+            pdf2txt = OCR(self.files_path.pdf, lang="tur", search=term, file_type = "pdf")
+            self.statusBar().showMessage('Query Done')
+
+    def new_img(self):
+        f1 = self.open_file(type="pdf")
+        if not f1:
+            self.statusBar().showMessage('Action Cancelled')
+        else:
+            classifier = AUTO_CLASSIFIER()
+            classifier.classify(os.path.abspath(f1))
+            self.statusBar().showMessage('New Image query')
 
     def classify_vid(self):
-        startTime = time.time()
         self.statusBar().showMessage('Video Classification Running')
         video_classifier(self.files_path.vid, tags = tags_vid)
         self.statusBar().showMessage('Video Classification Done')
 
     def classify_audio(self):
-        startTime = time.time()
         self.statusBar().showMessage('Audio Classification Running')
         audio_classifier(self.files_path.audio, tags = tags_audio)
         self.statusBar().showMessage('Audio Classification Done')
@@ -169,6 +204,17 @@ class Window(QMainWindow):
         self.statusBar().showMessage('Listing Audio Files by Classification Done')  
         display("audio_classification", self.config['DEFAULT']['dataset_path'])
         self.statusBar().showMessage('Listing Done')
+
+    def open_db(self):
+        url = self.config['DB']['db_server']+"_utils/index.html"
+        self.statusBar().showMessage('Opening Database') 
+        webbrowser.open_new(url)
+
+    def clear_db(self):
+        self.statusBar().showMessage('Clearing Database')
+        db_server = db_handler()
+        db_server.delete_all()
+        self.statusBar().showMessage('Database Clearing Done')
         
 
     def center(self):
@@ -187,6 +233,10 @@ class Window(QMainWindow):
             tmp = "Presentations (*.pptx *.ppt *.odp)"
         elif type == "xlsx":
             tmp = "Datasheets (*.xlsx *.xls *.ods)"
+        elif type == "img":
+            tmp = "Images (*.png *.jpg *.jpeg *.gif)"
+        elif type == "pdf":
+            tmp = "Images ,PDFs (*.png *.jpg *.jpeg *.gif *.pdf)"
         fname = QFileDialog.getOpenFileName(self, 'Open file', self.config['DEFAULT']['dataset_path'], tmp)
         if fname[0]:
             self.statusBar().showMessage('File {} opened'.format(fname[0]))
@@ -211,28 +261,35 @@ class MyTableWidget(QWidget):
         self.tab1 = QWidget()	
         self.tab2 = QWidget()
         self.tab3 = QWidget()
+        self.tab4 = QWidget()
         #self.tabs.resize(300,200) 
  
         # Add tabs
-        self.tabs.addTab(self.tab1,"File Type 1 (Text Documents)")
-        self.tabs.addTab(self.tab2,"File Type 2 (Images and PDFs)")
-        self.tabs.addTab(self.tab3,"File Type 3 (Video and Audio)")
+        self.tabs.addTab(self.tab1,"Type 1 (Text Documents)")
+        self.tabs.addTab(self.tab2,"Type 2 (Images and PDFs)")
+        self.tabs.addTab(self.tab3,"Type 3 (Video and Audio)")
+        self.tabs.addTab(self.tab4,"Database")
 
         self.control1_wid = Tab1ControlWidget(self, config)
         self.control2_wid = Tab2ControlWidget(self, config)
         self.control3_wid = Tab3ControlWidget(self, config)
+        self.control4_wid = Tab4ControlWidget(self, config)
+        
 
         self.tab1.layout = QVBoxLayout(self)
         self.tab2.layout = QVBoxLayout(self)
         self.tab3.layout = QVBoxLayout(self)
+        self.tab4.layout = QVBoxLayout(self)
 
         self.tab1.layout.addWidget(self.control1_wid)
         self.tab2.layout.addWidget(self.control2_wid)
         self.tab3.layout.addWidget(self.control3_wid)
+        self.tab4.layout.addWidget(self.control4_wid)
 
         self.tab1.setLayout(self.tab1.layout)
         self.tab2.setLayout(self.tab2.layout)
         self.tab3.setLayout(self.tab3.layout)
+        self.tab4.setLayout(self.tab4.layout)
 
         # Add tabs to widget        
         self.layout.addWidget(self.tabs)
@@ -299,28 +356,24 @@ class Tab2ControlWidget(QWidget):
     def init_ui(self):
         ''' docstring '''
 
+        self.textbox = QLineEdit(self)
+        self.textbox.setText("Query Term")
+
+
         self.pushButtons = []
         self.pushButtons.append(QPushButton("Query by String of Characters"))
         self.pushButtons.append(QPushButton("Query by Template"))
-
-        self.pushButtons.append(QPushButton("List Previous Search Results"))
-        self.pushButtons.append(QPushButton("Classify Images"))
-        self.pushButtons.append(QPushButton("Hierarchecally Classify Images"))
         
-        self.pushButtons.append(QPushButton("Watch and Classify"))
-
-        #.pushButtons[0].clicked.connect(self.classify_vid)
+        self.pushButtons.append(QPushButton("Classify new Image"))
 
         self.vbox = QVBoxLayout(self)
         self.vbox.setSpacing(10)
         self.vbox.addStretch(3)
+        self.vbox.addWidget(self.textbox)
         for button in self.pushButtons[:2]:
             self.vbox.addWidget(button)
         self.vbox.addStretch(1)
-        for button in self.pushButtons[2:5]:
-            self.vbox.addWidget(button)
-        self.vbox.addStretch(1)
-        for button in self.pushButtons[5:]:
+        for button in self.pushButtons[2:]:
             self.vbox.addWidget(button)
         self.vbox.addStretch(3)
 
@@ -357,21 +410,33 @@ class Tab3ControlWidget(QWidget):
 
         self.setLayout(self.vbox)
 
+class Tab4ControlWidget(QWidget):
+    ''' doc string '''
+
+    def __init__(self, parent, config):
+        super(Tab4ControlWidget, self).__init__(parent)
+        self.init_ui()
+
+    def init_ui(self):
+        ''' docstring '''
+
+        self.pushButtons = []
+        self.pushButtons.append(QPushButton("Open Database in Browser"))
+        self.pushButtons.append(QPushButton("Clear Database"))
+
+        #.pushButtons[0].clicked.connect(self.classify_vid)
+
+        self.vbox = QVBoxLayout(self)
+        self.vbox.setSpacing(10)
+        self.vbox.addStretch(3)
+        for button in self.pushButtons:
+            self.vbox.addWidget(button)
+        self.vbox.addStretch(3)
+
+        self.setLayout(self.vbox)
+
 if __name__=="__main__":
-
-    # #specify files locations
-    op = sys.argv[1] if len(sys.argv) > 1 else None
-    # files_path = path_handler(dataset_path)
-    # templates = path_handler(templates_path)
-    # #tmp = path_handler(dataset_path, proc="list_files")
-
-    # if not op:
-    #     print("# Choose an option #")
-
-    if op == "clear_db":
-        # clear database
-        db_server = db_handler()
-        db_server.delete_all()
+    """ main routine """
 
     if not os.path.exists("html"):
             os.makedirs("html")
@@ -385,34 +450,3 @@ if __name__=="__main__":
     APP = QApplication(sys.argv)
     ex = Window()
     sys.exit(APP.exec_())
-
-    # elif op == "txt_class_txt": 
-    #     startTime = time.time()
-    #     for term in search_terms:
-    #         txt_xlass_txt(files_path.docx, search = term)
-    #         txt_xlass_txt(files_path.pptx, search = term)
-    #         txt_xlass_txt(files_path.xlsx, search = term)
-    #     #print("this functionality is not implemented yet")
-
-
-    # elif op == "txt_display": 
-    #     startTime = time.time()
-    #     print("this functionality is not implemented yet")
-    #     #TODO
-
-    # elif op == "img_class_txt": 
-    #     startTime = time.time()
-    #     for term in search_terms:
-    #         img2txt = OCR(files_path.img, lang="tur", search=term)
-    #         pdf2txt = OCR(files_path.pdf, lang="tur", search=term, file_type = "pdf")
-    
-    # elif op == "img_class_img": 
-    #     startTime = time.time()
-    #     img_class_img(files_path.img, templates = templates.img)
-    #     img_class_img(files_path.pdf, templates = templates.img, file_type = "pdf")
-
-
-    # endTime = time.time()
-    # delta = int((endTime - startTime)*1000)
-    # display_performance(delta)
-
