@@ -1,5 +1,5 @@
 # KOU_DoSA_GUI
-Submission for "PARDUS Dosya Sınıflandırma ve Analiz (DoSA)" Competition
+Submission for "PARDUS Dosya Sınıflandırma ve Analiz (DoSA)" Competition in which we won the first place: [source](https://www.linkedin.com/feed/update/urn:li:activity:6432215954771496960).
 
 # Contributors
 ### Team
@@ -16,9 +16,13 @@ Arş. Gör. Süleyman Eken
 
 
 # Non-Python Requirements
+
 libreoffice-dev
+
 libmagickwand-dev
+
 ffmpeg
+
 couchdb
 
 # Usage
