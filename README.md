@@ -1,5 +1,5 @@
 # KOU_DoSA_GUI
-Submission for "PARDUS Dosya Sınıflandırma ve Analiz (DoSA)" Competition in which we won the first place: [source](https://www.linkedin.com/feed/update/urn:li:activity:6432215954771496960).
+Submission for "PARDUS Dosya Sınıflandırma ve Analiz ([DoSA](https://inovasyon.havelsan.com.tr/havelsan/#/competition-open/4))" Competition in which we won the first place: [source](https://www.linkedin.com/feed/update/urn:li:activity:6432215954771496960).
 
 # Contributors
 ### Team
