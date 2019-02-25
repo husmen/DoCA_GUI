@@ -77,7 +77,7 @@ class Window(QMainWindow):
         ''' docstring '''
 
         #self.title = 'KOU DoSA GUI | {}'.format(self.config['DEFAULT']['username'])
-        self.title = 'DoCA | Document Classification and Analysis')
+        self.title = 'DoCA | Document Classification and Analysis'
  
         self.table_widget = MyTableWidget(self, self.config)
         self.setCentralWidget(self.table_widget)
