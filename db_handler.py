@@ -93,6 +93,17 @@ class db_handler():
                     if(doc.{} == '{}')
                         emit({}{});
                 }}'''.format(query_key, query_value, self.keys, ', doc.'+order if order else '' )
+
+            if order:
+                mango = {'selector': {query_key: query_value},
+                    'fields': keys,
+                    'sort':[{'name': 'asc'}]}
+            else:
+                mango = {'selector': {query_key: query_value},
+                    'fields': keys,
+                    'sort':[{'_id': 'asc'}]}
+
+
         elif query_key and not query_value:
             print("missing query value")
         elif query_value and not query_key:
@@ -108,7 +119,8 @@ class db_handler():
         except:
             return []
         else:
-            res = db.query(map_fun)
+            #res = db.query(map_fun)
+            res = db.find(mango)
             return res
 
     def delete_all(self):
