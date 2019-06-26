@@ -1,4 +1,6 @@
-# KOU_DoSA_GUI
+# DoCA_GUI
+DoCA (Document Classification and Analysis)
+
 Submission for "PARDUS Dosya Sınıflandırma ve Analiz ([DoSA](https://inovasyon.havelsan.com.tr/havelsan/#/competition-open/4))" Competition in which we won the first place: [source](https://www.linkedin.com/feed/update/urn:li:activity:6432215954771496960).
 
 # Contributors
