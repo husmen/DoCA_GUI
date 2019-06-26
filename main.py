@@ -20,9 +20,9 @@ tags_vid = {"0001.mp4":"S","0002.mp4":"N","0003.mp4":"S","0004.avi":"N","0005.mp
 tags_audio = {"0001.mp3":"Mixed","0002.mp3":"Mixed","0003.wav":"Speech","0004.mp3":"Mixed","0005.mp3":"Mixed","0006.wav":"Mixed","0007.mp3":"Mixed","0008.mp3":"Mixed","0009.mp3":"Mixed","0010.mp3":"Speech","0011.mp3":"Mixed","0012.wav":"Speech","0013.mp3":"Mixed"}
 
 #specify path locations
-dataset_path = "/home/husmen/Workspace/PARDUS/dosyalar"
-#dataset_path = "/home/husmen/Workspace/PARDUS/dosyalar_ornek"
-templates_path = "/home/husmen/Workspace/PARDUS/templates_logo"
+dataset_path = "/home/husmen/workspace/PARDUS/dosyalar"
+#dataset_path = "/home/husmen/workspace/PARDUS/dosyalar_ornek_2"
+templates_path = "/home/husmen/workspace/PARDUS/templates_logo"
 search_terms = ["öğrenci","üniversite","ankara","makedonya", "burs", "sınav"]
 
 
@@ -132,7 +132,7 @@ if __name__=="__main__":
     
     elif op == "img_class_img": 
         startTime = time.time()
-        img_class_img(files_path.img, templates = templates.img)
+        #img_class_img(files_path.img, templates = templates.img)
         img_class_img(files_path.pdf, templates = templates.img, file_type = "pdf")
 
 

@@ -217,6 +217,6 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
-    path = sys.argv[1] if len(sys.argv) > 1 else '../dosyalar_ornek'
+    path = sys.argv[1] if len(sys.argv) > 1 else '../dosyalar_ornek_2'
     run(path)
     

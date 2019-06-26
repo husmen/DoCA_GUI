@@ -41,7 +41,7 @@ import matplotlib.pyplot as plt
 tags_vid = {"0001.mp4":"S","0002.mp4":"N","0003.mp4":"S","0004.avi":"N","0005.mp4":"S","0006.mpg":"N","0007.mp4":"S","0008.mp4":"N","0009.mp4":"S","0010.mp4":"N","0011.mp4":"S","0012.mp4":"S","0013.mp4":"S","0014.mp4":"N","0015.mpg":"S","0016.avi":"S","0017.avi":"S"}
 tags_audio = {"0001.mp3":"Mixed","0002.mp3":"Mixed","0003.wav":"Speech","0004.mp3":"Mixed","0005.mp3":"Mixed","0006.wav":"Mixed","0007.mp3":"Mixed","0008.mp3":"Mixed","0009.mp3":"Mixed","0010.mp3":"Speech","0011.mp3":"Mixed","0012.wav":"Speech","0013.mp3":"Mixed"}
 
-templates_path = "/home/husmen/Workspace/PARDUS/templates_logo"
+templates_path = "/home/husmen/workspace/PARDUS/templates_logo"
 search_terms = ["öğrenci","üniversite","ankara","makedonya", "burs", "sınav"]
 
 def display(item, dataset_path):
@@ -76,8 +76,7 @@ class Window(QMainWindow):
     def init_ui(self):
         ''' docstring '''
 
-        #self.title = 'KOU DoSA GUI | {}'.format(self.config['DEFAULT']['username'])
-        self.title = 'DoCA | Document Classification and Analysis'
+        self.title = 'KOU DoSA GUI | {}'.format(self.config['DEFAULT']['username'])
  
         self.table_widget = MyTableWidget(self, self.config)
         self.setCentralWidget(self.table_widget)
