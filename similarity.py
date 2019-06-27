@@ -68,6 +68,8 @@ class SimilarityRatio():
         for doc in self.files_opened:
             self.docLabels.append(doc.location)
 
+        self.algo = "dbscan"
+
         # create a list data that stores the content of all text files in order of their names in docLabels
         data = []
         if file_format == "docx" or file_format == "pptx":
@@ -197,12 +199,12 @@ class SimilarityRatio():
             # #############################################################################
             # Compute Affinity
 
-            if True:
+            if self.algo == "aff":
                 af = AffinityPropagation(preference=-50).fit(X)
                 cluster_centers_indices = af.cluster_centers_indices_
                 n_clusters_ = len(cluster_centers_indices)
                 labels = af.labels_
-            else: #trying DBScan instead
+            elif self.algo == "dbscan": #trying DBScan instead
                 X = StandardScaler().fit_transform(X)
                 af = DBSCAN(eps=3, min_samples=2).fit(X)
                 core_samples_mask = np.zeros_like(af.labels_, dtype=bool)
@@ -258,7 +260,7 @@ class SimilarityRatio():
             # reduced = pca.fit_transform(X)
             # X = reduced
 
-            if True:
+            if self.algo == "aff":
                 colors = cycle('bgrcmykbgrcmykbgrcmykbgrcmyk')
                 for k, col in zip(range(n_clusters_), colors):
                     class_members = labels == k
@@ -274,7 +276,7 @@ class SimilarityRatio():
                     'Clustering with Affinity Propagation | Estimated number of clusters: %d' % n_clusters_)
                 plt.savefig(
                     'models/{}_affinity_clusters.png'.format(file_format), dpi=300)
-            else:
+            elif self.algo == "dbscan":
                 colors = [plt.cm.Spectral(each) for each in np.linspace(0, 1, len(unique_labels))]
                 for k, col in zip(unique_labels, colors):
                     if k == -1:
