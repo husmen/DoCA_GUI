@@ -1,7 +1,9 @@
 # Load the API (Current warning is related to h5py and has no consequences)
 import os
 import time
+import numpy as np
 from inaSpeechSegmenter import Segmenter, seg2csv
+from pyAudioAnalysis import audioSegmentation as aS
 from db_handler import *
 
 class audio_classifier():
@@ -13,27 +15,42 @@ class audio_classifier():
         self.results = []
         self.tags = tags
         self.meta = []
+        self.algo = "ina" #ina/paa
         self.db_server = db_handler()
         self.classify()
         self.save_results()
         self.print_results()
+        
 
     def classify(self):
-        self.seg = Segmenter()
+        if self.algo == "ina":
+            self.seg = Segmenter()
+
         counter = 0
         for audioPath in self.media:
             startTime = int(round(time.time()))
             vid = audioPath.split("/")[-1]
             print("### {}/{} Processing {} ###".format(counter, len(self.media), vid))
-            tmp = self.seg(audioPath)
-            tmp2 = str(tmp)
-            self.segmentation.append(tmp)
-            if ("Male" in tmp2 or "Female" in tmp2) and "Music" in tmp2:
-                self.results.append("Mixed")
-            elif "Music" in tmp2:
-                self.results.append("Music")
-            elif "Male" in tmp2 or "Female" in tmp2:
-                self.results.append("Speech")
+            if self.algo == "ina":
+                tmp = self.seg(audioPath)
+                tmp2 = str(tmp)
+                self.segmentation.append(tmp)
+                if ("Male" in tmp2 or "Female" in tmp2) and "Music" in tmp2:
+                    self.results.append("Mixed")
+                elif "Music" in tmp2:
+                    self.results.append("Music")
+                elif "Male" in tmp2 or "Female" in tmp2:
+                    self.results.append("Speech")
+
+            elif self.algo == "paa":
+                [flagsInd, classesAll, acc, CM] = aS.mtFileClassification(audioPath, "svmSM/svmSM", "svm", False, '')
+                res = np.array(flagsInd).mean()
+                if res <= 0.1:
+                    self.results.append("Speech")
+                elif res >= 0.9:
+                    self.results.append("Music")
+                else:
+                    self.results.append("Mixed")
 
             endTime = int(round(time.time()))
             self.times.append(endTime-startTime)
