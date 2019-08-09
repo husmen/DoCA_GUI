@@ -12,13 +12,14 @@ Kübra Köksal
 
 ### Supervisors
 
-Doç. Dr. Ahmet Sayar
+Assoc. Prof. Dr. Ahmet Sayar
 
-Arş. Gör. Süleyman Eken
+Res. Asst. Dr. Süleyman Eken
 
 
-# Non-Python Requirements
+# Usage
 
+### Install the following requirements
 libreoffice-dev
 
 libmagickwand-dev
@@ -27,7 +28,8 @@ ffmpeg
 
 couchdb
 
-# Usage
+### Clone, setup environment and run
+
     git clone https://github.com/husmen/DoCA_GUI.git
     cd DoCA_GUI
     conda env create -f pardus.yml
@@ -37,3 +39,20 @@ couchdb
 
 # Screenshot
 ![Screenshot](https://github.com/husmen/DoCA_GUI/blob/master/screenshot.png)
+
+# Citing
+This work has been published in IEEE Open Access. You can cite it in your publication:
+
+    @ARTICLE{8768370,
+    author={S. {Eken} and H. {Menhour} and K. {Köksal}},
+    journal={IEEE Access},
+    title={DoCA: A Content-Based Automatic Classification System Over Digital Documents},
+    year={2019},
+    volume={7},
+    number={},
+    pages={97996-98004},
+    keywords={Task analysis;Feature extraction;Text analysis;Optical character recognition software;Libraries;Pattern matching;Organizations;Document analysis;document classification;OCR;video-audio analysis},
+    doi={10.1109/ACCESS.2019.2930339},
+    ISSN={2169-3536},
+    month={},}
+    
