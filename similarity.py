@@ -11,8 +11,7 @@ from os import listdir
 from os.path import isfile, join
 from db_handler import *
 from open_files import OpenFile
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
+from rapidfuzz import fuzz
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import AffinityPropagation
@@ -89,7 +88,7 @@ class SimilarityRatio():
                     data.append("")
 
         data = nlp_clean(data)
-        if method == "fuzzywuzzy":
+        if method == "rapidfuzz":
             for i, f1 in enumerate(data):
                 for f2 in data[i+1:]:
                     # print(self.docLabels[i],self.docLabels[i+1])

@@ -33,7 +33,6 @@ dynamic-reconfigure==1.6.0
 EbookLib==0.15
 et-xmlfile==1.0.1
 eyeD3==0.8.10
-fuzzywuzzy==0.17.0
 gast==0.2.2
 gazebo-plugins==2.8.4
 gazebo-ros==2.8.4
@@ -97,7 +96,6 @@ pyplantuml==0.1.51
 pytesseract==0.2.6
 python-dateutil==2.8.0
 python-docx==0.8.10
-python-Levenshtein==0.12.0
 python-magic==0.4.15
 python-pptx==0.6.5
 python-qt-binding==0.3.5
@@ -108,6 +106,7 @@ qt-dotgraph==0.3.11
 qt-gui==0.3.11
 qt-gui-cpp==0.3.11
 qt-gui-py-common==0.3.11
+rapidfuzz==0.7.3
 requests==2.21.0
 resource-retriever==1.12.4
 rosbag==1.14.3

@@ -58,7 +58,6 @@ dependencies:
     - ebooklib==0.15
     - et-xmlfile==1.0.1
     - eyed3==0.8.10
-    - fuzzywuzzy==0.17.0
     - gast==0.2.2
     - gensim==3.7.3
     - grpcio==1.20.1
@@ -108,12 +107,12 @@ dependencies:
     - pytesseract==0.2.6
     - python-dateutil==2.8.0
     - python-docx==0.8.10
-    - python-levenshtein==0.12.0
     - python-magic==0.4.15
     - python-pptx==0.6.5
     - pytz==2019.1
     - pywavelets==1.0.3
     - pyyaml==5.1
+    - rapidfuzz==0.7.3
     - requests==2.21.0
     - s3transfer==0.2.0
     - scikit-image==0.15.0

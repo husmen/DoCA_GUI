@@ -104,11 +104,11 @@ if __name__=="__main__":
 
     elif op == "xlsx_similarity": 
         startTime = time.time()
-        SimilarityRatio(files_path.xlsx,"xlsx",method="fuzzywuzzy")
+        SimilarityRatio(files_path.xlsx,"xlsx",method="rapidfuzz")
 
     elif op == "pptx_similarity": 
         startTime = time.time()
-        SimilarityRatio(files_path.pptx,"pptx",method="fuzzywuzzy")
+        SimilarityRatio(files_path.pptx,"pptx",method="rapidfuzz")
 
     elif op == "txt_class_txt": 
         startTime = time.time()

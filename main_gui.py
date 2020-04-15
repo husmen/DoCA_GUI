@@ -127,7 +127,7 @@ class Window(QMainWindow):
         if not f1 or not f2:
             self.statusBar().showMessage('Action Cancelled')
         else:
-            SimilarityRatio([f1,f2],tmp,method="fuzzywuzzy")
+            SimilarityRatio([f1,f2],tmp,method="rapidfuzz")
     
     def doc_classify(self):
         tmp = self.table_widget.control1_wid.combo_box.currentText()
