@@ -103,7 +103,7 @@ python-pptx==0.6.5
 python-qt-binding==0.3.5
 pytz==2019.1
 PyWavelets==1.0.3
-PyYAML==5.1
+PyYAML==5.4
 qt-dotgraph==0.3.11
 qt-gui==0.3.11
 qt-gui-cpp==0.3.11
