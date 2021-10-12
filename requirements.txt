@@ -74,7 +74,7 @@ nltk==3.4.5
 nose==1.3.7
 numpy==1.16.3
 odfpy==1.4.0
-opencv-contrib-python==3.4.2.17
+opencv-contrib-python==3.4.7.28
 opencv-python==3.4.2.17
 openpyxl==2.5.14
 pandas==0.24.2
