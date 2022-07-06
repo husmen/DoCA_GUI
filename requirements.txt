@@ -63,7 +63,7 @@ kiwisolver==1.1.0
 laser-geometry==1.6.4
 lml==0.0.9
 logilab-common==1.4.2
-lxml==4.3.3
+lxml==4.9.1
 Markdown==3.1
 matplotlib==3.0.3
 message-filters==1.14.3
