@@ -14,7 +14,7 @@ botocore==1.12.147
 camera-calibration==1.12.23
 camera-calibration-parsers==1.11.13
 catkin==0.7.17
-certifi==2019.3.9
+certifi==2022.12.7
 chardet==2.3.0
 controller-manager==0.15.1
 controller-manager-msgs==0.15.1
